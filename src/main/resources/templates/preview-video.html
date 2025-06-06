@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Preview Video</title>
+</head>
+<body>
+<h2 th:text="${fileName}">Video Preview</h2>
+<video width="640" height="360" controls>
+    <source th:src="@{${videoUrl}}" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+</body>
+</html>

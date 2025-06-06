@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Share File</title>
+    <link rel="icon" type="image/png" th:href="@{images/file-sharing.png}">
+    <link th:href="@{/style/css/share-files.css}" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+<div class="container">
+    <div class="box download-box">
+        <h1>Download Your File</h1>
+        <p>File Name: <span th:text="${file.fileName} ?: 'N/A'"></span></p>
+        <p>File Type: <span th:text="${fileType}"></span></p>
+        <p>Uploaded By: <span th:text="${file.uploadedBy}"></span></p>
+        <form th:action="@{/files/download/{id}(id=${file.id})}" method="get">
+            <button type="submit" class="download-button">
+                <i class="fas fa-download"></i> Download File
+            </button>
+        </form>
+
+<!--        <div class="conversion-buttons">-->
+<!--            <div th:if="${fileType == 'image'}">-->
+<!--                <a th:href="@{/files/convert/jpg-to-pdf/{id}(id=${file.id})}"-->
+<!--                   class="btn btn-primary me-2">-->
+<!--                    Convert to PDF-->
+<!--                </a>-->
+<!--            </div>-->
+<!--            <div th:if="${fileType == 'pdf'}">-->
+<!--                <a th:href="@{/files/convert/pdf-to-docx/{id}(id=${file.id})}"-->
+<!--                   class="btn btn-secondary me-2">-->
+<!--                    Convert to DOCX-->
+<!--                </a>-->
+<!--                <a th:href="@{/files/convert/pdf-to-ppt/{id}(id=${file.id})}"-->
+<!--                   class="btn btn-success">-->
+<!--                    Convert to PPT-->
+<!--                </a>-->
+<!--            </div>-->
+<!--        </div>-->
+        <div class="conversion-container">
+
+
+            <div class="" style="display: flex; align-items: center; gap: 10px;">
+                <!-- File Type Dropdown -->
+                <select id="fileTypeSelect" class="form-control" style="max-width: 250px;">
+                    <option value="" disabled selected>Select File Type</option>
+                    <option value="pdf">PDF</option>
+                    <option value="docx">DOCX</option>
+                    <option value="ppt">PPT</option>
+                </select>
+
+                <!-- Download Button -->
+                <a id="downloadLink" class="hidden">
+                    <i class="fa fa-download"></i> Download File
+                </a>
+            </div>
+
+            <p id="message" class="mt-3 text-warning font-weight-bold"></p>
+        </div>
+
+
+
+    </div>
+
+    <div class="preview-box" th:switch="${fileType}">
+        <!-- Audio Preview -->
+        <div th:case="'audio'">
+            <h1>Audio Preview</h1>
+            <audio controls style="width: 100%; border-radius: 8px;">
+                <source th:src="${file.fileUrl}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+
+        <!-- Image/PDF Preview -->
+        <div th:case="'image'">
+<!--            <a th:href="@{/files/preview/{id}(id=${file.id})}" target="_blank">-->
+            <a th:href="${file.fileUrl}" target="_blank">
+                <button class="preview-button">
+                    <i class="fas fa-eye"></i> Preview Image
+                </button>
+            </a>
+        </div>
+
+        <!-- PDF Preview -->
+        <div th:case="'pdf'">
+            <a th:href="${file.fileUrl}" target="_blank" class="preview-button">
+                <i class="fas fa-eye"></i> Preview PDF
+            </a>
+        </div>
+
+        <!-- DOC Preview via Google Docs Viewer -->
+        <div th:case="'doc'">
+            <a th:href="'https://docs.google.com/viewer?url=' + ${#urls.urlEncode(file.fileUrl)}"
+               target="_blank" class="preview-button">
+                <i class="fas fa-eye"></i> Preview Document
+            </a>
+        </div>
+
+        <!-- Video Preview with Quality Options -->
+        <div th:case="'video'" style="background-color: #2c2c2c; padding: 20px; border-radius: 12px; color: #fff; font-family: 'Segoe UI', sans-serif; max-width: 800px; margin: auto; box-shadow: 0 0 20px rgba(0,0,0,0.3);">
+            <h1 style="text-align: center; margin-bottom: 20px;">Video Preview</h1>
+
+            <video id="videoPlayer" width="100%" height="auto" controls style="border-radius: 10px;">
+                <source id="videoSource" th:src="${file.fileUrl}" type="video/mp4" />
+                Your browser does not support the video tag.
+            </video>
+
+            <!-- Playback Speed and Quality Selectors -->
+            <div style="margin-top: 15px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                <div>
+                    <label for="playbackRate">Playback Speed:</label>
+                    <select id="playbackRate" onchange="changePlaybackRate()">
+                        <option value="0.5">0.5x</option>
+                        <option value="1" selected>1x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2x</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="videoQuality">Video Quality:</label>
+                    <select id="videoQuality" onchange="changeVideoQuality()">
+                        <option value="" disabled selected>Select Quality</option>
+                        <option th:value="${video1080Url}">1080p</option>
+                        <option th:value="${video720Url}">720p</option>
+                        <option th:value="${video480Url}">480p</option>
+                        <option th:value="${video240Url}">240p</option>
+                        <option th:value="${video144Url}">144p</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Download Buttons -->
+            <div class="download-options" style="margin-top: 25px; text-align: center;">
+                <h4>Download Video</h4>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;">
+                    <a th:href="${video1080Url}" download><button>Download 1080p</button></a>
+                    <a th:href="${video720Url}" download><button>Download 720p</button></a>
+                    <a th:href="${video480Url}" download><button>Download 480p</button></a>
+                    <a th:href="${video240Url}" download><button>Download 240p</button></a>
+                </div>
+            </div>
+        </div>
+
+        <div th:case="*">
+            <p>No preview available for this file type.</p>
+        </div>
+    </div>
+
+    <!-- Share Section -->
+    <div class="box share-box">
+        <h2>Share This Page</h2>
+        <p>URL: <input type="text" id="shareUrl" th:value="${shareUrl}" readonly/></p>
+
+        <button class="copy-button" onclick="copyToClipboard()">
+            <i class="fas fa-copy"></i> Copy URL
+        </button>
+
+        <!-- Use a different ID for the hidden input -->
+        <input type="hidden" id="shareUrlHidden" th:value="${shareUrl}" />
+
+        <button id="shareQrCodeButton">Generate QR Code</button>
+        <div id="qrcode"></div>
+
+    </div>
+
+    <a href="/files/home" class="back-link">Back to File List</a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<!-- JS Section -->
+<script>
+    // 📋 Copy URL to clipboard
+    function copyToClipboard() {
+        const copyText = document.getElementById("shareUrl");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        alert("URL copied to clipboard: " + copyText.value);
+    }
+
+    // 🎬 Change playback speed
+    function changePlaybackRate() {
+        const player = document.getElementById('videoPlayer');
+        const speed = document.getElementById('playbackRate').value;
+        player.playbackRate = parseFloat(speed);
+    }
+
+    // 🎞️ Change video quality (URL-based)
+    function changeVideoQuality() {
+        const player = document.getElementById('videoPlayer');
+        const source = document.getElementById('videoSource');
+        const newUrl = document.getElementById('videoQuality').value;
+
+        if (!newUrl) return;
+
+        const currentTime = player.currentTime;
+        const isPlaying = !player.paused;
+
+        source.src = newUrl;
+        player.load();
+
+        player.onloadedmetadata = () => {
+            player.currentTime = currentTime;
+            if (isPlaying) player.play();
+        };
+    }
+
+    // 📱 Generate QR code for sharing
+    document.getElementById("shareQrCodeButton").addEventListener("click", function () {
+        const url = document.getElementById("shareUrlHidden").value;
+        const qrContainer = document.getElementById("qrcode");
+        qrContainer.innerHTML = ""; // Clear previous QR code
+        new QRCode(qrContainer, {
+            text: url,
+            width: 128,
+            height: 128,
+        });
+    });
+
+    // 🔄 File conversion logic
+    document.getElementById("fileTypeSelect").addEventListener("change", function () {
+        const fileType = this.value;
+        const downloadLink = document.getElementById("downloadLink");
+        const message = document.getElementById("message");
+
+        let href = "";
+        switch (fileType) {
+            case "pdf":
+                href = `/files/convert/jpg-to-pdf/${fileId}`;
+                break;
+            case "docx":
+                href = `/files/convert/pdf-to-docx/${fileId}`;
+                break;
+            case "ppt":
+                href = `/files/convert/pdf-to-ppt/${fileId}`;
+                break;
+            default:
+                href = "#";
+        }
+
+        if (fileType && href !== "#") {
+            downloadLink.href = href;
+            downloadLink.classList.remove("hidden");
+            message.textContent = "";
+        } else {
+            downloadLink.classList.add("hidden");
+            message.textContent = "Please select a file type.";
+        }
+    });
+
+
+
+
+
+</script>
+<script th:inline="javascript">
+    let fileId = /*[[${file.id}]]*/ 0;
+</script>
+</body>
+</html>
