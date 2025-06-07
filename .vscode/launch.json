@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        
+
+        {
+            "type": "java",
+            "name": "Spring Boot-ShareSphereApplication<ShareSphere>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.ShareSphere.ShareSphereApplication",
+            "projectName": "ShareSphere",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
