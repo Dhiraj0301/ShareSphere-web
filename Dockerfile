@@ -5,7 +5,8 @@ FROM maven:3.8.5-eclipse-temurin-17 AS builder
 WORKDIR /build
 
 # Copy only the ShareSphere directory which contains pom.xml and code
-COPY ./ShareSphere /build
+COPY . /build
+
 
 
 # Package the Spring Boot app (skip tests for faster build)
