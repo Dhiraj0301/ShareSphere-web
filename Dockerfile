@@ -1,24 +1,31 @@
-# Stage 1: Build the application using Maven
-FROM maven:3.9.6-eclipse-temurin-17-alpine AS builder
+# Stage 1: Build using Maven
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 
-WORKDIR /build
+# Set working directory to /app
+WORKDIR /app
 
-# Copy everything (pom.xml + src/ + mvnw + .mvn etc.)
+# Copy pom.xml and download dependencies first (for Docker caching)
+COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw .
+RUN ./mvnw dependency:go-offline
+
+# Now copy all project files
 COPY . .
 
-# Package the Spring Boot app (skip tests for faster build)
-RUN mvn clean package -DskipTests
+# Build the project (skip tests for faster build)
+RUN ./mvnw clean package -DskipTests
 
-# Stage 2: Run the app with JRE only
+# Stage 2: Run the app using a lightweight JDK
 FROM eclipse-temurin:17-jdk-alpine
 
 WORKDIR /app
 
-# Copy built JAR from builder stage
-COPY --from=builder /build/target/*.jar app.jar
+# Copy the built jar from the previous stage
+COPY --from=build /app/target/*.jar app.jar
 
-# Expose port
+# Expose port (Spring Boot default)
 EXPOSE 8080
 
-# Run the Spring Boot app
+# Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
