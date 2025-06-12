@@ -17,7 +17,7 @@ public class FileEntity {
     private String uploadedBy;
     private String contentType;
     @Lob
-    @Column(name = "file_data", columnDefinition = "LONGBLOB")
+    @Column(name = "file_data")
     private byte[] fileData; // Add this field to store file contents
 
     private LocalDateTime uploadTime;
