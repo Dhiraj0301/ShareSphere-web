@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: sharesphere
+    env: docker
+    plan: free
+    repo: https://github.com/Dhiraj0301/ShareSphere-web
+    branch: main
+    dockerfilePath: Dockerfile
+    buildCommand: ""
+    startCommand: ""
+    envVars:
+      - key: PORT
+        value: 8080
