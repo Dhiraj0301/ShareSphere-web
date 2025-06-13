@@ -22,6 +22,12 @@ public class SecurityConfig {
                         .loginPage("/files/login") // Custom login page
                         .successHandler(customSuccessHandler())
                 )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/files/login")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                )
                 .csrf(csrf -> csrf.disable()); // Disable CSRF for simplicity; use it in production.
 
         return http.build();
